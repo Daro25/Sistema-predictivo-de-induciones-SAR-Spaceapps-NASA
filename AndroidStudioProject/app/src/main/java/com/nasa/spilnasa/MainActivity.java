@@ -15,7 +15,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
 public class MainActivity extends AppCompatActivity {
+
+
 
     private static final String TAG = "NASA_WORLDVIEW";
 
@@ -34,28 +44,34 @@ public class MainActivity extends AppCompatActivity {
         new Thread(() -> {
 
             // CONSULTA 1: AIRS - HUMEDAD RELATIVA
-            consultarNASA(
+            List<RegistroNASA> humedad = consultarNASA(
                     "AIRS_L2_Surface_Relative_Humidity_Day",
                     "AIRS_RelativeHumidity.xml",
                     "HUMEDAD AIRS"
             );
 
-            // CONSULTA 2: IMERG - PRECIPITACIÓN
-            consultarNASA(
+            List<RegistroNASA> precipitacion = consultarNASA(
                     "IMERG_Precipitation_Rate",
                     "GPM_Precipitation_Rate.xml",
                     "PRECIPITACIÓN IMERG"
             );
 
+// Aquí ya puedes manipularlas:
+            if (!humedad.isEmpty()) {
+                double primerValor = humedad.get(0).getValor();
+                Log.d(TAG, "Primer valor de humedad: " + primerValor);
+            }
         }).start();
     }
 
-    private void consultarNASA(
+    private List<RegistroNASA> consultarNASA(
             String layer,
             String colormap,
             String nombreVariable) {
 
         HttpURLConnection connection = null;
+        List<RegistroNASA> registros = new ArrayList<>();
+
 
         try {
 
@@ -133,14 +149,12 @@ public class MainActivity extends AppCompatActivity {
 
                 JSONObject data = new JSONObject(respuesta.toString());
 
-                Object mean = data.opt("mean");
+                JSONObject mean = data.getJSONObject("mean");
+                registros = parsearMean(mean);
 
-                Log.d(TAG, "================================");
-                Log.d(TAG, "VARIABLE: " + nombreVariable);
-                Log.d(TAG, "Métricas obtenidas correctamente");
-                Log.d(TAG, "Promedios por fecha (mean): " + mean);
-                Log.d(TAG, "================================");
-
+                for (RegistroNASA r : registros) {
+                    Log.d(TAG, nombreVariable + " | " + r.getFecha() + " = " + r.getValor());
+                }
 
             } else {
 
@@ -160,5 +174,25 @@ public class MainActivity extends AppCompatActivity {
                 connection.disconnect();
             }
         }
+        return registros;
+    }
+    private List<RegistroNASA> parsearMean(JSONObject mean) throws Exception {
+        List<RegistroNASA> lista = new ArrayList<>();
+
+        SimpleDateFormat formato =
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+        formato.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        Iterator<String> claves = mean.keys();
+        while (claves.hasNext()) {
+            String clave = claves.next();
+            double valor = mean.optDouble(clave, Double.NaN);
+            if (!Double.isNaN(valor)) {
+                lista.add(new RegistroNASA(formato.parse(clave), valor));
+            }
+        }
+
+        Collections.sort(lista, (a, b) -> a.getFecha().compareTo(b.getFecha()));
+        return lista;
     }
 }
