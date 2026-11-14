@@ -1,5 +1,4 @@
 package com.nasa.spilnasa;
-
 import java.util.Date;
 
 public class RegistroNASA {

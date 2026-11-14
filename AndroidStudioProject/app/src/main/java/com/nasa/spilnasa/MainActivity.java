@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject data = new JSONObject(respuesta.toString());
 
                 JSONObject mean = data.getJSONObject("mean");
-                registros = parsearMean(mean);
+                registros = parsearMean(mean, nombreVariable.contains("HUMEDAD"));
 
                 for (RegistroNASA r : registros) {
                     Log.d(TAG, nombreVariable + " | " + r.getFecha() + " = " + r.getValor());
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return registros;
     }
-    private List<RegistroNASA> parsearMean(JSONObject mean) throws Exception {
+    private List<RegistroNASA> parsearMean(JSONObject mean, boolean ignorarCeros) throws Exception {
         List<RegistroNASA> lista = new ArrayList<>();
 
         SimpleDateFormat formato =
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         while (claves.hasNext()) {
             String clave = claves.next();
             double valor = mean.optDouble(clave, Double.NaN);
-            if (!Double.isNaN(valor)) {
+            if (!Double.isNaN(valor) && !(ignorarCeros && valor == 0)) {
                 lista.add(new RegistroNASA(formato.parse(clave), valor));
             }
         }
