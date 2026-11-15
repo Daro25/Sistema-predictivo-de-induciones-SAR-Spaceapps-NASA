@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private String[] regiones = {"Zona Norte de Veracruz (Alamo)","Zona Norte de Veracruz (Poza Rica)", "Zona Norte de Veracruz (Tantoyuca)"};
     private String[] cuadrantes = {"20.7283,-97.3204,21.1368,-96.9119", "-102.7302,18.178909,-91.97641,23.0447246","-109.6064,12.9984015625,-82.6064,25.2151984375"};
     private int[] locateMapAltura = {R.drawable.altitudalamo, R.drawable.altitudpozarica, R.drawable.altitudbocario};
-    private int[] locateMap = {R.drawable.alamo};
+    private int[] locateMap = { R.drawable.alamo};
     private int indexRegion = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
