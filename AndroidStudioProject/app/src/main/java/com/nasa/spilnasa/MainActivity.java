@@ -31,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String URL_BASE =
             "https://worldview.earthdata.nasa.gov/service/imagestat/get_stats";
+    private static final long MS_DIA = 24L * 60 * 60 * 1000;
+    private static final double AREA_M2 = 2578715915.0;          // D19
+    private static final double VOLUMEN_SEGURO = 38680738.73;    // D22
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,18 +53,46 @@ public class MainActivity extends AppCompatActivity {
                     "HUMEDAD AIRS"
             );
 
+            // CONSULTA 2: IMERG - PRECIPITACIÓN
             List<RegistroNASA> precipitacion = consultarNASA(
                     "IMERG_Precipitation_Rate",
                     "GPM_Precipitation_Rate.xml",
                     "PRECIPITACIÓN IMERG"
             );
 
-// Aquí ya puedes manipularlas:
-            if (!humedad.isEmpty()) {
-                double primerValor = humedad.get(0).getValor();
-                Log.d(TAG, "Primer valor de humedad: " + primerValor);
+            // ALERTA DINÁMICA: solo para la última fecha de la consulta
+            // TABLA COMPLETA (igual que el Excel): una fila por día desde el día 4
+            if (!precipitacion.isEmpty()) {
+
+                long inicio = precipitacion.get(0).getFecha().getTime();
+
+                for (RegistroNASA p : precipitacion) {
+
+                    if (p.getFecha().getTime() < inicio + 3 * MS_DIA) continue;
+
+                    java.util.Date fecha = p.getFecha();
+
+                    double hMax   = maxHumedad3Dias(humedad, fecha);
+                    double indice = IndiceHumedad.calcular(humedad, fecha);
+                    double acum   = acumulada3Dias(precipitacion, fecha);
+
+                    if (Double.isNaN(hMax) || Double.isNaN(indice)) continue;
+
+                    String alerta     = evaluarAlerta(hMax, p.getValor(), acum);
+                    double volumen    = calcularVolumen(indice, acum);
+                    String alertaAcum = volumen > VOLUMEN_SEGURO ? "Alta" : "Baja";
+
+                    Log.d(TAG, fecha
+                            + " | Indice: " + indice
+                            + " | HumMax: " + hMax
+                            + " | Acum: " + acum
+                            + " | Alerta: " + alerta
+                            + " | Volumen: " + volumen
+                            + " | Alerta acumulada: " + alertaAcum);
+                }
             }
-        }).start();
+
+    }).start();
     }
 
     private List<RegistroNASA> consultarNASA(
@@ -77,13 +108,13 @@ public class MainActivity extends AppCompatActivity {
 
             String parametros =
                     "_type=series" +
-                            "&timestamp=2026-10-1" +
+                            "&timestamp=2025-10-01" +
                             "&steps=31" +
                             "&layer=" + URLEncoder.encode(layer, "UTF-8") +
                             "&colormap=" + URLEncoder.encode(colormap, "UTF-8") +
                             "&bbox=20.7283,-97.3204,21.1368,-96.9119" +
                             "&bins=10" +
-                            "&end_timestamp=2026-10-11";
+                            "&end_timestamp=2025-10-11";
 
             URL url = new URL(URL_BASE + "?" + parametros);
 
@@ -150,11 +181,14 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject data = new JSONObject(respuesta.toString());
 
                 JSONObject mean = data.getJSONObject("mean");
-                registros = parsearMean(mean, nombreVariable.contains("HUMEDAD"));
+                registros = parsearMean(mean, false);
+
+
 
                 for (RegistroNASA r : registros) {
                     Log.d(TAG, nombreVariable + " | " + r.getFecha() + " = " + r.getValor());
                 }
+
 
             } else {
 
@@ -194,5 +228,56 @@ public class MainActivity extends AppCompatActivity {
 
         Collections.sort(lista, (a, b) -> a.getFecha().compareTo(b.getFecha()));
         return lista;
+    }
+
+
+    private double maxHumedad3Dias(List<RegistroNASA> humedad, java.util.Date fecha) {
+        double max = Double.NaN;
+        for (int k = 1; k <= 3; k++) {
+            double v = buscarValor(humedad, new java.util.Date(fecha.getTime() - k * MS_DIA));
+            if (!Double.isNaN(v) && (Double.isNaN(max) || v > max)) {
+                max = v;
+            }
+        }
+        return max;
+    }
+
+    private double acumulada3Dias(List<RegistroNASA> precip, java.util.Date fecha) {
+        double suma = 0;
+        for (int k = 1; k <= 3; k++) {
+            double v = buscarValor(precip, new java.util.Date(fecha.getTime() - k * MS_DIA));
+            if (!Double.isNaN(v)) {
+                suma += v;
+            }
+        }
+        return suma;
+    }
+
+    // Traducción de tu fórmula SI.CONJUNTO
+    private String evaluarAlerta(double humedadMax, double lluvia, double acumulada) {
+        double h = humedadMax / 100.0;   // el Excel compara contra 0.4 y 0.6
+
+        if (h < 0.4) {
+            return "Verde";
+        } else if (h >= 0.4 && h < 0.6 && lluvia >= 5) {
+            return "Amarillo";
+        } else if (h > 0.6 && lluvia >= 2) {
+            return "Naranja";
+        } else if (h > 0.6 && (acumulada >= 10 || acumulada == 8)) {
+            return "Rojo";
+        } else {
+            return "Verde";
+        }
+    }
+    private double buscarValor(List<RegistroNASA> lista, java.util.Date fecha) {
+        for (RegistroNASA r : lista) {
+            if (r.getFecha().getTime() == fecha.getTime()) {
+                return r.getValor();
+            }
+        }
+        return Double.NaN;
+    }
+    private double calcularVolumen(double indice, double acumulada) {
+        return indice * acumulada * (1.0 / 1000) * 24 * AREA_M2;
     }
 }
