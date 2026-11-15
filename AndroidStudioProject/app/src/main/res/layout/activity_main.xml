@@ -210,7 +210,7 @@
                         android:id="@+id/tvPrecipitation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0,00 mm/seg"
+                        android:text="0,00 mm/h"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -290,7 +290,7 @@
                         android:id="@+id/tvAccumulatedPrecipitation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0,00 mm/seg"
+                        android:text="0,00 mm/h"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -479,7 +479,7 @@
                         android:id="@+id/mapaIMG"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/altitudAlamo" />
+                        app:srcCompat="@drawable/altitudalamo" />
                 </FrameLayout>
 
                 <!-- Botón Info (i) -->

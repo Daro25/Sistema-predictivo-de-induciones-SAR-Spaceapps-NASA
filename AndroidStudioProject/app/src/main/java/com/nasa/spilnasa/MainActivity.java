@@ -3,26 +3,6 @@ package com.nasa.spilnasa;
 
 import android.os.Bundle;
 import android.util.Log;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,6 +12,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "NASA_WORLDVIEW";
@@ -46,7 +43,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvPrecipitation, tvHumidity, tvAccumulatedPrecipitation, tvHumidityIndex;
     private LinearLayout colorAlert;
     private TextView tvAlertLevel, tvAlertSubtitle, tvAlertDescription;
-
+    public ColometriaIMG colometriaIMG;
+    private double hMax = 0, indice = 0, acum = 0, volumen;
+    private String alerta = "", alertaAcum = "";
+    private float precipitacionOne = 0.0f;
+    private int fase = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,11 +68,13 @@ public class MainActivity extends AppCompatActivity {
         tvAlertLevel = getTextView(R.id.tvAlertLevel);
         tvAlertSubtitle = getTextView(R.id.tvAlertSubtitle);
         tvAlertDescription = getTextView(R.id.tvAlertDescription);
+        colometriaIMG = new ColometriaIMG(mapaView);
         consultarAmbasVariables();
     }
     private TextView getTextView(int id){
         return (TextView) findViewById(id);
     }
+
     private void consultarAmbasVariables() {
 
         new Thread(() -> {
@@ -90,39 +93,71 @@ public class MainActivity extends AppCompatActivity {
                     "PRECIPITACIÓN IMERG"
             );
 
-            // ALERTA DINÁMICA: solo para la última fecha de la consulta
-            // TABLA COMPLETA (igual que el Excel): una fila por día desde el día 4
-            if (!precipitacion.isEmpty()) {
-
-                long inicio = precipitacion.get(0).getFecha().getTime();
-
-                for (RegistroNASA p : precipitacion) {
-
-                    if (p.getFecha().getTime() < inicio + 3 * MS_DIA) continue;
-
-                    java.util.Date fecha = p.getFecha();
-
-                    double hMax   = maxHumedad3Dias(humedad, fecha);
-                    double indice = IndiceHumedad.calcular(humedad, fecha);
-                    double acum   = acumulada3Dias(precipitacion, fecha);
-
-                    if (Double.isNaN(hMax) || Double.isNaN(indice)) continue;
-
-                    String alerta     = evaluarAlerta(hMax, p.getValor(), acum);
-                    double volumen    = calcularVolumen(indice, acum);
-                    String alertaAcum = volumen > VOLUMEN_SEGURO ? "Alta" : "Baja";
-
-                    Log.d(TAG, fecha
-                            + " | Indice: " + indice
-                            + " | HumMax: " + hMax
-                            + " | Acum: " + acum
-                            + " | Alerta: " + alerta
-                            + " | Volumen: " + volumen
-                            + " | Alerta acumulada: " + alertaAcum);
-                }
+            // Validar resultados
+            if (precipitacion == null || precipitacion.isEmpty()
+                    || humedad == null || humedad.isEmpty()) {
+                Log.e(TAG, "No hay suficientes datos NASA");
+                return;
             }
 
-    }).start();
+            // ALERTA Y TABLA COMPLETA
+            long inicio = precipitacion.get(0).getFecha().getTime();
+
+            for (RegistroNASA p : precipitacion) {
+
+                if (p.getFecha().getTime() < inicio + 3 * MS_DIA)
+                    continue;
+
+                Date fecha = p.getFecha();
+
+                hMax = maxHumedad3Dias(humedad, fecha);
+                indice = IndiceHumedad.calcular(humedad, fecha);
+                acum = acumulada3Dias(precipitacion, fecha);
+
+                if (Double.isNaN(hMax) || Double.isNaN(indice))
+                    continue;
+
+                alerta = evaluarAlerta(hMax, p.getValor(), acum);
+                volumen = calcularVolumen(indice, acum);
+
+                alertaAcum = volumen > VOLUMEN_SEGURO
+                        ? "Alta" : "Baja";
+
+                Log.d(TAG, fecha
+                        + " | Indice: " + indice
+                        + " | HumMax: " + hMax
+                        + " | Acum: " + acum
+                        + " | Alerta: " + alerta
+                        + " | Volumen: " + volumen
+                        + " | Alerta acumulada: " + alertaAcum);
+            }
+
+            // Última precipitación
+            precipitacionOne = (float)
+                    precipitacion.get(precipitacion.size() - 1).getValor();
+
+            // Determinar fase
+            switch (alerta) {
+                case "Verde": fase = 1; break;
+                case "Amarillo": fase = 2; break;
+                case "Naranja": fase = 3; break;
+                case "Rojo": fase = 4; break;
+                default: fase = 0; break;
+            }
+
+            // Actualizar interfaz en el hilo principal
+            runOnUiThread(() -> {
+                tvHumidityIndex.setText(indice + "%");
+                tvHumidity.setText(hMax + "%");
+                tvAccumulatedPrecipitation.setText(acum + "mm/h");
+                tvPrecipitation.setText(precipitacionOne + "mm/h");
+                colometriaIMG.convertImage(
+                        fase,
+                        (int) (acum * 24 / 1000)
+                );
+                Log.d(TAG, "Calculado ====================");
+            });
+        }).start();
     }
 
     private List<RegistroNASA> consultarNASA(
@@ -272,8 +307,10 @@ public class MainActivity extends AppCompatActivity {
     // Traducción de tu fórmula SI.CONJUNTO
     private String evaluarAlerta(double humedadMax, double lluvia, double acumulada) {
         double h = humedadMax / 100.0;   // el Excel compara contra 0.4 y 0.6
-
-        if (h < 0.4) {
+        if (h <= 0.0f){
+            return "null";
+        }
+        else if (h < 0.4 && h> 0 ) {
             return "Verde";
         } else if (h >= 0.4 && h < 0.6 && lluvia >= 5) {
             return "Amarillo";
