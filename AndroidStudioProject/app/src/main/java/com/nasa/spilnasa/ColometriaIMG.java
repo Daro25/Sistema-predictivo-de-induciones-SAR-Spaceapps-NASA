@@ -13,174 +13,80 @@ private ImageView imageView;
     public ColometriaIMG(ImageView imageView) {
         this.imageView = imageView;
     }
+
     public ImageView convertImage(int alertaFase, int alturaAgua) {
-        Drawable drawable = imageView.getDrawable();
-        Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
+
+        if (imageView == null || imageView.getDrawable() == null) {
+            return imageView;
+        }
+
+        if (!(imageView.getDrawable() instanceof BitmapDrawable)) {
+            return imageView;
+        }
+
+        Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
+
         int[] pixels = new int[width * height];
 
-        bitmap.getPixels(
-                pixels, 0, width,
-                0, 0, width, height
-        );
+        bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+
+        // Colores de la escala de riesgo
+        final int ROJO = Color.rgb(229, 57, 53);
+        final int NARANJA = Color.rgb(251, 140, 0);
+        final int AMARILLO = Color.rgb(253, 216, 53);
+        final int VERDE = Color.rgb(67, 160, 71);
 
         for (int y = 0; y < height; y++) {
+
             for (int x = 0; x < width; x++) {
+
                 int index = y * width + x;
                 int pixel = pixels[index];
 
-                int red = (pixel >> 16) & 0xFF;
-                int green = (pixel >> 8) & 0xFF;
-                int blue = pixel & 0xFF;
-                int altura = rgbToHeight(red,green,blue) - alturaAgua;
-                if(alertaFase == 0) pixels[index] = Color.TRANSPARENT;
-                else if (alertaFase == 1) {
-                    if (altura <= 84) {
-                        float potencialInverso = (altura * 255f) / 84f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    } else if (altura > 84 && altura <= 110) {
-                        int newAltura = altura - 84;
-                        float potencialInverso = (newAltura * 255f) / 26f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb(255,(int) potencial, 0);
-                        pixels[index] = color;
-                    } else if (altura > 110 && altura <= 119) {
-                        int newAltura = altura - 110;
-                        float potencialInverso = (newAltura * 255f) / 19f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, (int) potencial,0);
-                        pixels[index] = color;
-                    }else if (altura > 119 && altura <= 137) {
-                        int newAltura = altura - 119;
-                        float potencialInverso = (newAltura * 255f) / 18f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb(255, (int) potencial,255);
-                        pixels[index] = color;
-                    }
+                int red = Color.red(pixel);
+                int green = Color.green(pixel);
+                int blue = Color.blue(pixel);
+
+                // Obtener elevación y restar nivel del agua
+                int altura = rgbToHeight(red, green, blue) - alturaAgua;
+
+                if (alertaFase == 0) {
+                    pixels[index] = Color.TRANSPARENT;
+                    continue;
                 }
-                else if (alertaFase == 2) {
-                    if (altura <= 84) {
-                        float potencialInverso = (altura * 255f) / 84f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    } else if (altura > 84 && altura <= 110) {
-                        int newAltura = altura - 84;
-                        float potencialInverso = (newAltura * 255f) / 26f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    } else if (altura > 110 && altura <= 119) {
-                        int newAltura = altura - 110;
-                        float potencialInverso = (newAltura * 255f) / 19f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb(255,(int) potencial, 0);
-                        pixels[index] = color;
-                    }else if (altura > 119 && altura <= 137) {
-                        int newAltura = altura - 119;
-                        float potencialInverso = (newAltura * 255f) / 18f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, (int) potencial,0);
-                        pixels[index] = color;
-                    }
-                }
-                else if (alertaFase == 3) {
-                    if (altura <= 84) {
-                        float potencialInverso = (altura * 255f) / 84f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    } else if (altura > 84 && altura <= 110) {
-                        int newAltura = altura - 84;
-                        float potencialInverso = (newAltura * 255f) / 26f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    } else if (altura > 110 && altura <= 119) {
-                        int newAltura = altura - 110;
-                        float potencialInverso = (newAltura * 255f) / 19f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    }else if (altura > 119 && altura <= 137) {
-                        int newAltura = altura - 119;
-                        float potencialInverso = (newAltura * 255f) / 18f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb(255,(int) potencial, 0);
-                        pixels[index] = color;
-                    }
-                }
-                else if (alertaFase == 4) {
-                    if (altura <= 84) {
-                        float potencialInverso = (altura * 255f) / 84f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    } else if (altura > 84 && altura <= 110) {
-                        int newAltura = altura - 84;
-                        float potencialInverso = (newAltura * 255f) / 26f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    } else if (altura > 110 && altura <= 119) {
-                        int newAltura = altura - 110;
-                        float potencialInverso = (newAltura * 255f) / 19f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    }else if (altura > 119 && altura <= 137) {
-                        int newAltura = altura - 119;
-                        float potencialInverso = (newAltura * 255f) / 18f;
-                        float potencial = 255f - potencialInverso;
-                        // Limitar el valor al rango 0-255
-                        potencial = Math.max(0f, Math.min(255f, potencial));
-                        int color = Color.rgb((int) potencial, 255,255);
-                        pixels[index] = color;
-                    }
+
+                // Clasificación de riesgo
+                if (altura <= 84) {
+
+                    pixels[index] = ROJO;
+
+                } else if (altura <= 110) {
+
+                    pixels[index] = NARANJA;
+
+                } else if (altura <= 119) {
+
+                    pixels[index] = AMARILLO;
+
+                } else if (altura <= 137) {
+
+                    pixels[index] = VERDE;
                 }
             }
         }
-        // Convertir el arreglo de píxeles en Bitmap
+
         Bitmap nuevoBitmap = Bitmap.createBitmap(
                 pixels,
                 width,
                 height,
                 Bitmap.Config.ARGB_8888
         );
+
         imageView.setImageBitmap(nuevoBitmap);
+
         return imageView;
     }
     public static int rgbToHeight(int red, int green, int blue) {
