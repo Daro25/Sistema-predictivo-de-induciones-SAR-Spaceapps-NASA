@@ -92,6 +92,7 @@
             app:strokeWidth="0dp">
 
             <LinearLayout
+                android:id="@+id/colorAlert"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -472,7 +473,14 @@
                 <FrameLayout
                     android:id="@+id/mapPreviewContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent" >
+
+                    <ImageView
+                        android:id="@+id/mapaIMG"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/altitudAlamo" />
+                </FrameLayout>
 
                 <!-- Botón Info (i) -->
                 <ImageButton

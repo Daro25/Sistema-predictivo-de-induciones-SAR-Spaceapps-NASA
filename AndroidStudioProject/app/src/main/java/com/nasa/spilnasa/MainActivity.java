@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +41,12 @@ public class MainActivity extends AppCompatActivity {
     private static final double AREA_M2 = 2578715915.0;          // D19
     private static final double VOLUMEN_SEGURO = 38680738.73;    // D22
 
+    //inputs y views
+    private ImageView mapaView;
+    private TextView tvPrecipitation, tvHumidity, tvAccumulatedPrecipitation, tvHumidityIndex;
+    private LinearLayout colorAlert;
+    private TextView tvAlertLevel, tvAlertSubtitle, tvAlertDescription;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,10 +57,21 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        // definición de views
+        mapaView = (ImageView) findViewById(R.id.mapaIMG);
+        tvPrecipitation = getTextView(R.id.tvPrecipitation);
+        tvHumidity = getTextView(R.id.tvHumidity);
+        tvAccumulatedPrecipitation = getTextView(R.id.tvAccumulatedPrecipitation);
+        tvHumidityIndex = getTextView(R.id.tvHumidityIndex);
+        colorAlert = (LinearLayout) findViewById(R.id.colorAlert);
+        tvAlertLevel = getTextView(R.id.tvAlertLevel);
+        tvAlertSubtitle = getTextView(R.id.tvAlertSubtitle);
+        tvAlertDescription = getTextView(R.id.tvAlertDescription);
         consultarAmbasVariables();
     }
-
+    private TextView getTextView(int id){
+        return (TextView) findViewById(id);
+    }
     private void consultarAmbasVariables() {
 
         new Thread(() -> {
@@ -184,36 +204,22 @@ public class MainActivity extends AppCompatActivity {
 
                 reader.close();
             }
-
             // Procesar resultados
             if (codigo == HttpURLConnection.HTTP_OK) {
-
                 JSONObject data = new JSONObject(respuesta.toString());
-
                 JSONObject mean = data.getJSONObject("mean");
                 registros = parsearMean(mean, false);
-
-
-
                 for (RegistroNASA r : registros) {
                     Log.d(TAG, nombreVariable + " | " + r.getFecha() + " = " + r.getValor());
                 }
-
-
             } else {
-
                 Log.e(TAG, "VARIABLE: " + nombreVariable);
                 Log.e(TAG, "Error HTTP: " + codigo);
                 Log.e(TAG, "Respuesta: " + respuesta);
-
             }
-
         } catch (Exception e) {
-
             Log.e(TAG, "Error en " + nombreVariable, e);
-
         } finally {
-
             if (connection != null) {
                 connection.disconnect();
             }
