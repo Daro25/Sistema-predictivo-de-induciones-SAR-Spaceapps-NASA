@@ -4,9 +4,15 @@ package com.nasa.spilnasa;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private static final double VOLUMEN_SEGURO = 38680738.73;    // D22
 
     //inputs y views
-    private ImageView mapaView;
+    private ImageView mapaView, imageViewmapa;
     private TextView tvPrecipitation, tvHumidity, tvAccumulatedPrecipitation, tvHumidityIndex;
     private MaterialCardView colorAlert;
     private TextView tvAlertLevel, tvAlertSubtitle, tvAlertDescription;
@@ -51,6 +57,13 @@ public class MainActivity extends AppCompatActivity {
     private String alerta = "", alertaAcum = "";
     private float precipitacionOne = 0.0f;
     private int fase = 0;
+    private EditText tvSelectedDate;
+    private Spinner spinnerZone;
+    private String[] regiones = {"Zona Norte de Veracruz (Alamo)","Zona Norte de Veracruz (Poza Rica)", "Zona Norte de Veracruz (Tantoyuca)"};
+    private String[] cuadrantes = {"20.7283,-97.3204,21.1368,-96.9119", "-102.7302,18.178909,-91.97641,23.0447246","-109.6064,12.9984015625,-82.6064,25.2151984375"};
+    private int[] locateMapAltura = {R.drawable.altitudalamo, R.drawable.altitudpozarica, R.drawable.altitudbocario};
+    private int[] locateMap = {R.drawable.alamo};
+    private int indexRegion = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         });
         // definición de views
         mapaView = (ImageView) findViewById(R.id.mapaIMG);
+        imageViewmapa = (ImageView) findViewById(R.id.imageViewmapa);
         tvPrecipitation = getTextView(R.id.tvPrecipitation);
         tvHumidity = getTextView(R.id.tvHumidity);
         tvAccumulatedPrecipitation = getTextView(R.id.tvAccumulatedPrecipitation);
@@ -72,6 +86,35 @@ public class MainActivity extends AppCompatActivity {
         tvAlertSubtitle = getTextView(R.id.tvAlertSubtitle);
         tvAlertDescription = getTextView(R.id.tvAlertDescription);
         colometriaIMG = new ColometriaIMG(mapaView);
+        tvSelectedDate = findViewById(R.id.tvSelectedDate);
+        spinnerZone = findViewById(R.id.spinnerZone);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                regiones
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // 5. Asigna el adaptador al Spinner
+        spinnerZone.setAdapter(adapter);
+
+        // 6. (Opcional) Detecta cuando el usuario selecciona un elemento
+        spinnerZone.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String seleccionado = parent.getItemAtPosition(position).toString();
+                Toast.makeText(MainActivity.this, "Calculando nueva zona", Toast.LENGTH_LONG).show();
+                indexRegion = position;
+                imageViewmapa.setImageResource(locateMap[indexRegion]);
+                mapaView.setImageResource(locateMapAltura[indexRegion]);
+                colometriaIMG = new ColometriaIMG(mapaView);
+                consultarAmbasVariables();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Acción si no hay nada seleccionado
+            }
+        });
         consultarAmbasVariables();
     }
     private TextView getTextView(int id){
@@ -204,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
                             "&steps=31" +
                             "&layer=" + URLEncoder.encode(layer, "UTF-8") +
                             "&colormap=" + URLEncoder.encode(colormap, "UTF-8") +
-                            "&bbox=20.7283,-97.3204,21.1368,-96.9119" +
+                            "&bbox="+ cuadrantes[indexRegion] +
                             "&bins=10" +
                             "&end_timestamp=2025-10-11";
 
