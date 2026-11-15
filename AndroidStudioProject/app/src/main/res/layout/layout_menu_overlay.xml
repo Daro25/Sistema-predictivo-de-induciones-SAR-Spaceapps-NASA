@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/menuOverlayRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Halo circular claro detrás del botón de menú (menu - 1.5.jpg) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/btnMenuHighlight"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="14dp"
+        app:cardBackgroundColor="#52FFFFFF"
+        app:cardCornerRadius="26dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
+
+        <ImageButton
+            android:id="@+id/btnCloseMenu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Cerrar menú"
+            android:src="@android:drawable/ic_menu_sort_by_size"
+            app:tint="#1F2A30" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Tarjeta flotante blanca con las opciones del menú -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardMenuPopup"
+        android:layout_width="248dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="70dp"
+        android:layout_marginEnd="54dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Opción 1: Asignar zona automáticamente -->
+            <LinearLayout
+                android:id="@+id/optionAutoAssignZone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="Ubicación automática"
+                    android:src="@android:drawable/ic_dialog_map"
+                    app:tint="#F6D93B" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Asignar zona automáticamente"
+                    android:textColor="#1E1E1E"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E2E2E2" />
+
+            <!-- Opción 2: Acerca de -->
+            <LinearLayout
+                android:id="@+id/optionAbout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="Acerca de"
+                    android:src="@android:drawable/ic_dialog_info"
+                    app:tint="#4A4A4A" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Acerca de"
+                    android:textColor="#1E1E1E"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>
