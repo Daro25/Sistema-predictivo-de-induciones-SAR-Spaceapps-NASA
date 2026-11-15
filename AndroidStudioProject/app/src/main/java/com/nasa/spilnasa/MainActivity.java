@@ -12,7 +12,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+<<<<<<< Updated upstream
 import android.widget.Toast;
+=======
+
+import android.app.DatePickerDialog;
+import java.util.Calendar;
+
+import android.view.View;
+import androidx.activity.OnBackPressedCallback;
+>>>>>>> Stashed changes
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -48,7 +57,16 @@ public class MainActivity extends AppCompatActivity {
     private static final double VOLUMEN_SEGURO = 38680738.73;    // D22
 
     //inputs y views
+<<<<<<< Updated upstream
     private ImageView mapaView, imageViewmapa;
+=======
+    private ImageView mapaView;
+
+    private String fechaInicio = "2025-10-01";
+    private String fechaFin = "2025-10-11";
+    private final Calendar fechaSeleccionada = Calendar.getInstance();
+    private View menuOverlay;
+>>>>>>> Stashed changes
     private TextView tvPrecipitation, tvHumidity, tvAccumulatedPrecipitation, tvHumidityIndex;
     private MaterialCardView colorAlert;
     private TextView tvAlertLevel, tvAlertSubtitle, tvAlertDescription;
@@ -86,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         tvAlertSubtitle = getTextView(R.id.tvAlertSubtitle);
         tvAlertDescription = getTextView(R.id.tvAlertDescription);
         colometriaIMG = new ColometriaIMG(mapaView);
+<<<<<<< Updated upstream
         tvSelectedDate = findViewById(R.id.tvSelectedDate);
         spinnerZone = findViewById(R.id.spinnerZone);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -115,11 +134,94 @@ public class MainActivity extends AppCompatActivity {
                 // Acción si no hay nada seleccionado
             }
         });
+=======
+        configurarSelectorFecha();
+        consultarAmbasVariables();
+
+        configurarMenuOverlay();
+>>>>>>> Stashed changes
         consultarAmbasVariables();
     }
     private TextView getTextView(int id){
         return (TextView) findViewById(id);
     }
+<<<<<<< Updated upstream
+=======
+    private void configurarSelectorFecha() {
+        TextView tvFecha = findViewById(R.id.tvSelectedDate);
+
+        // Fecha inicial = la que ya usabas (11/10/2025)
+        fechaSeleccionada.set(2025, Calendar.OCTOBER, 11);
+        tvFecha.setText(textoFecha(fechaSeleccionada));
+        tvFecha.setTextColor(Color.parseColor("#1A1A1A"));
+
+        findViewById(R.id.cardDateSelector).setOnClickListener(v -> {
+            DatePickerDialog dialogo = new DatePickerDialog(
+                    this,
+                    (vista, year, month, day) -> {
+                        fechaSeleccionada.set(year, month, day);
+                        tvFecha.setText(textoFecha(fechaSeleccionada));
+
+                        // Ventana de 10 días que termina en la fecha elegida
+                        fechaFin = formatoApi(fechaSeleccionada);
+                        Calendar inicio = (Calendar) fechaSeleccionada.clone();
+                        inicio.add(Calendar.DAY_OF_YEAR, -6);
+                        fechaInicio = formatoApi(inicio);
+                        Log.d(TAG, "fechaInicio=" + fechaInicio + " | fechaFin=" + fechaFin);
+
+                        consultarAmbasVariables();
+                    },
+                    fechaSeleccionada.get(Calendar.YEAR),
+                    fechaSeleccionada.get(Calendar.MONTH),
+                    fechaSeleccionada.get(Calendar.DAY_OF_MONTH)
+            );
+            // No permitir fechas muy recientes: la NASA aún no tiene datos
+            dialogo.getDatePicker().setMaxDate(System.currentTimeMillis() - 2 * MS_DIA);
+            dialogo.show();
+        });
+    }
+
+    private String formatoApi(Calendar c) {
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(c.getTime());
+    }
+
+    private String textoFecha(Calendar c) {
+        return new SimpleDateFormat("dd/MM/yyyy", Locale.US).format(c.getTime());
+    }
+    private void configurarMenuOverlay() {
+        menuOverlay = findViewById(R.id.menuOverlayRoot);
+
+        findViewById(R.id.btnMenu).setOnClickListener(v ->
+                menuOverlay.setVisibility(View.VISIBLE));
+
+        findViewById(R.id.btnCloseMenu).setOnClickListener(v ->
+                menuOverlay.setVisibility(View.GONE));
+        menuOverlay.setOnClickListener(v ->
+                menuOverlay.setVisibility(View.GONE));
+
+        findViewById(R.id.optionAutoAssignZone).setOnClickListener(v -> {
+            menuOverlay.setVisibility(View.GONE);
+            // TODO: lógica de "Asignar zona automáticamente"
+        });
+
+        findViewById(R.id.optionAbout).setOnClickListener(v -> {
+            menuOverlay.setVisibility(View.GONE);
+            // TODO: mostrar "Acerca de"
+        });
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (menuOverlay.getVisibility() == View.VISIBLE) {
+                    menuOverlay.setVisibility(View.GONE);
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
+    }
+>>>>>>> Stashed changes
 
     private void consultarAmbasVariables() {
 
@@ -243,13 +345,13 @@ public class MainActivity extends AppCompatActivity {
 
             String parametros =
                     "_type=series" +
-                            "&timestamp=2025-10-01" +
+                            "&timestamp=" + fechaInicio +
                             "&steps=31" +
                             "&layer=" + URLEncoder.encode(layer, "UTF-8") +
                             "&colormap=" + URLEncoder.encode(colormap, "UTF-8") +
                             "&bbox="+ cuadrantes[indexRegion] +
                             "&bins=10" +
-                            "&end_timestamp=2025-10-11";
+                            "&end_timestamp=" + fechaFin;
 
             URL url = new URL(URL_BASE + "?" + parametros);
 
