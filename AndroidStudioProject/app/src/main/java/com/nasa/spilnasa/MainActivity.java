@@ -8,6 +8,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import android.view.View;
+import androidx.activity.OnBackPressedCallback;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     //inputs y views
     private ImageView mapaView;
+    private View menuOverlay;
     private TextView tvPrecipitation, tvHumidity, tvAccumulatedPrecipitation, tvHumidityIndex;
     private MaterialCardView colorAlert;
     private TextView tvAlertLevel, tvAlertSubtitle, tvAlertDescription;
@@ -72,10 +76,44 @@ public class MainActivity extends AppCompatActivity {
         tvAlertSubtitle = getTextView(R.id.tvAlertSubtitle);
         tvAlertDescription = getTextView(R.id.tvAlertDescription);
         colometriaIMG = new ColometriaIMG(mapaView);
+        configurarMenuOverlay();
         consultarAmbasVariables();
     }
     private TextView getTextView(int id){
         return (TextView) findViewById(id);
+    }
+    private void configurarMenuOverlay() {
+        menuOverlay = findViewById(R.id.menuOverlayRoot);
+
+        findViewById(R.id.btnMenu).setOnClickListener(v ->
+                menuOverlay.setVisibility(View.VISIBLE));
+
+        findViewById(R.id.btnCloseMenu).setOnClickListener(v ->
+                menuOverlay.setVisibility(View.GONE));
+        menuOverlay.setOnClickListener(v ->
+                menuOverlay.setVisibility(View.GONE));
+
+        findViewById(R.id.optionAutoAssignZone).setOnClickListener(v -> {
+            menuOverlay.setVisibility(View.GONE);
+            // TODO: lógica de "Asignar zona automáticamente"
+        });
+
+        findViewById(R.id.optionAbout).setOnClickListener(v -> {
+            menuOverlay.setVisibility(View.GONE);
+            // TODO: mostrar "Acerca de"
+        });
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (menuOverlay.getVisibility() == View.VISIBLE) {
+                    menuOverlay.setVisibility(View.GONE);
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
     }
 
     private void consultarAmbasVariables() {
