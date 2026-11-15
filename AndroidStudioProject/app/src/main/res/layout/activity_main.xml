@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -7,10 +7,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/fondo"
     tools:context=".MainActivity">
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,8 +17,6 @@
         android:paddingBottom="24dp">
 
         <!-- Barra superior: '+' a la izquierda, 'Álamo' + pin al centro, menú a la derecha -->
-
-        <!-- SECCIÓN 1: SEMÁFORO DE ZONA -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="52dp">
@@ -32,7 +26,7 @@
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:layout_alignParentStart="true"
-                android:layout_marginStart="3dp"
+                android:layout_centerVertical="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Agregar zona"
                 android:src="@android:drawable/ic_input_add"
@@ -54,6 +48,13 @@
                     android:textSize="24sp"
                     android:textStyle="bold" />
 
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="6dp"
+                    android:contentDescription="Ubicación"
+                    android:src="@android:drawable/ic_dialog_map"
+                    app:tint="#F6D93B" />
             </LinearLayout>
 
             <ImageButton
@@ -68,6 +69,7 @@
                 app:tint="#1F2A30" />
         </RelativeLayout>
 
+        <!-- SECCIÓN 1: SEMÁFORO DE ZONA -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -148,121 +150,8 @@
                     android:text="El suelo absorbe el agua con normalidad. Puedes realizar tus actividades habituales."
                     android:textColor="#FFFFFF"
                     android:textSize="14sp" />
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginStart="6dp"
-                    android:contentDescription="Ubicación"
-                    android:src="@android:drawable/ic_dialog_map"
-                    app:tint="#F6D93B" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="22dp"
-            android:layout_marginBottom="8dp"
-            android:letterSpacing="0.04"
-            android:text="INFORMACION DE ZONA"
-            android:textColor="#FFFFFF"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-        <LinearLayout
-            android:id="@+id/cardLeyendaRiesgo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="12dp"
-            android:background="@drawable/bg_leyenda_riesgo"
-            android:elevation="5dp">
-
-            <!-- IMAGEN DEL SEMÁFORO -->
-            <ImageView
-                android:id="@+id/imgSemaforo"
-                android:layout_width="85dp"
-                android:layout_height="230dp"
-                android:src="@drawable/imgsemaforo"
-                android:scaleType="fitCenter"
-                android:contentDescription="Semáforo de cuatro niveles de riesgo"/>
-
-            <!-- INFORMACIÓN DE RIESGO -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingStart="12dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Rojo: Peligro"
-                    android:textColor="#D71920"
-                    android:textStyle="bold"
-                    android:textSize="15sp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Suelo al 100% de saturación + lluvia intensa. Desbordamiento inevitable. Dirígete a un lugar seguro ahora mismo."
-                    android:textColor="#263238"
-                    android:textSize="11sp"
-                    android:paddingBottom="7dp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Naranja: Alerta"
-                    android:textColor="#E87500"
-                    android:textStyle="bold"
-                    android:textSize="15sp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Suelo saturado (+65%) + lluvia moderada. Riesgo inminente de crecida de arroyos. Aléjate de cauces."
-                    android:textColor="#263238"
-                    android:textSize="11sp"
-                    android:paddingBottom="7dp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Amarillo: Precaución"
-                    android:textColor="#A88A00"
-                    android:textStyle="bold"
-                    android:textSize="15sp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Suelo al (+40%) + lluvia ligera a moderada. Aumento del nivel de agua."
-                    android:textColor="#263238"
-                    android:textSize="11sp"
-                    android:paddingBottom="7dp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Verde: Normal"
-                    android:textColor="#267D35"
-                    android:textStyle="bold"
-                    android:textSize="15sp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Suelo al (-40%) + lluvia ligera. Sin riesgo de inundación."
-                    android:textColor="#263238"
-                    android:textSize="11sp"/>
-
-            </LinearLayout>
-
-        </LinearLayout>
 
         <!-- SECCIÓN 2: INFORMACION DE ZONA -->
         <TextView
@@ -506,19 +395,16 @@
                         app:cardElevation="0dp"
                         app:strokeWidth="0dp">
 
-                        <EditText
+                        <TextView
                             android:id="@+id/tvSelectedDate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:ems="10"
                             android:gravity="center"
                             android:paddingHorizontal="8dp"
                             android:paddingVertical="5dp"
                             android:text="Día   Mes   Año"
                             android:textColor="#7A7A7A"
-                            android:textSize="11sp"
-                            android:inputType="date" />
-
+                            android:textSize="11sp" />
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -590,16 +476,9 @@
                     android:layout_height="match_parent" >
 
                     <ImageView
-                        android:id="@+id/imageViewmapa"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/alamo" />
-
-                    <ImageView
                         android:id="@+id/mapaIMG"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:alpha="0.65"
                         app:srcCompat="@drawable/altitudalamo" />
                 </FrameLayout>
 
@@ -716,6 +595,3 @@
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </ScrollView>
-    <include layout="@layout/layout_menu_overlay" />
-
-</FrameLayout>
