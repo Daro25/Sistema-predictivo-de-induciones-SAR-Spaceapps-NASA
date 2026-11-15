@@ -1,6 +1,7 @@
 package com.nasa.spilnasa;
 
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -12,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.card.MaterialCardView;
 
 import org.json.JSONObject;
 
@@ -41,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     //inputs y views
     private ImageView mapaView;
     private TextView tvPrecipitation, tvHumidity, tvAccumulatedPrecipitation, tvHumidityIndex;
-    private LinearLayout colorAlert;
+    private MaterialCardView colorAlert;
     private TextView tvAlertLevel, tvAlertSubtitle, tvAlertDescription;
     public ColometriaIMG colometriaIMG;
     private double hMax = 0, indice = 0, acum = 0, volumen;
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         tvHumidity = getTextView(R.id.tvHumidity);
         tvAccumulatedPrecipitation = getTextView(R.id.tvAccumulatedPrecipitation);
         tvHumidityIndex = getTextView(R.id.tvHumidityIndex);
-        colorAlert = (LinearLayout) findViewById(R.id.colorAlert);
+        colorAlert = (MaterialCardView) findViewById(R.id.cardTrafficLight);
         tvAlertLevel = getTextView(R.id.tvAlertLevel);
         tvAlertSubtitle = getTextView(R.id.tvAlertSubtitle);
         tvAlertDescription = getTextView(R.id.tvAlertDescription);
@@ -155,6 +158,30 @@ public class MainActivity extends AppCompatActivity {
                         fase,
                         (int) (acum * 24 / 1000)
                 );
+                tvAlertLevel.setText("Alerta "+alerta);
+                switch (alerta) {
+                    case "Verde":
+                        colorAlert.setBackgroundColor(Color.parseColor("#66D158"));
+                        tvAlertSubtitle.setText("Sin riesgo de inundación");
+                        tvAlertDescription.setText("El suelo absorbe el agua con normalidad. Puedes realizar tus actividades habituales.");
+                        break;
+                    case "Amarillo":
+                        colorAlert.setBackgroundColor(Color.parseColor("#ebe867"));
+                        tvAlertSubtitle.setText("Posible acumulación de agua");
+                        tvAlertDescription.setText("Empieza a correr agua por las calles. Mantente atento a las actualizaciones.");
+                        break;
+                    case "Naranja":
+                        colorAlert.setBackgroundColor(Color.parseColor("#f79d43"));
+                        tvAlertSubtitle.setText("Alerta: Riesgo alto cerca de ríos y arroyos");
+                        tvAlertDescription.setText("Si vives cerca de un cauce, prepárate para evacuar y ten lista tu mochila de emergencia.");
+                        break;
+                    case "Rojo":
+                        colorAlert.setBackgroundColor(Color.parseColor("#f74343"));
+                        tvAlertSubtitle.setText("¡PELIGRO: DESBORDAMIENTO INMINENTE!");
+                        tvAlertDescription.setText("Evacúa de inmediato hacia una zona alta o albergue seguro.\nLos índices de alerta se han disparado, cuídate y cuida a los tuyos.");
+                        break;
+                    default: fase = 0; break;
+                }
                 Log.d(TAG, "Calculado ====================");
             });
         }).start();
