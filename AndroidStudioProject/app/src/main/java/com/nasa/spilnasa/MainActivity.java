@@ -147,10 +147,10 @@ public class MainActivity extends AppCompatActivity {
 
             // Actualizar interfaz en el hilo principal
             runOnUiThread(() -> {
-                tvHumidityIndex.setText(indice + "%");
-                tvHumidity.setText(hMax + "%");
-                tvAccumulatedPrecipitation.setText(acum + "mm/h");
-                tvPrecipitation.setText(precipitacionOne + "mm/h");
+                tvHumidityIndex.setText(vistaPresent((float)indice*100) + "%");
+                tvHumidity.setText(vistaPresent((float)hMax) + "%");
+                tvAccumulatedPrecipitation.setText(vistaPresent((float)acum) + "mm/h");
+                tvPrecipitation.setText(vistaPresent(precipitacionOne) + "mm/h");
                 colometriaIMG.convertImage(
                         fase,
                         (int) (acum * 24 / 1000)
@@ -332,5 +332,8 @@ public class MainActivity extends AppCompatActivity {
     }
     private double calcularVolumen(double indice, double acumulada) {
         return indice * acumulada * (1.0 / 1000) * 24 * AREA_M2;
+    }
+    private String vistaPresent(float numero) {
+        return  String.format("%.2f", numero);
     }
 }
