@@ -13,9 +13,16 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.DatePickerDialog;
+import java.util.Calendar;
+
+<<<<<<< HEAD
 
 
-
+=======
+import android.view.View;
+import androidx.activity.OnBackPressedCallback;
+>>>>>>> 4aa0fc8862d5556b81b677489a5bea2c2ac85c5a
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -48,7 +55,10 @@ public class MainActivity extends AppCompatActivity {
     private static final long MS_DIA = 24L * 60 * 60 * 1000;
     private static final double AREA_M2 = 2578715915.0;          // D19
     private static final double VOLUMEN_SEGURO = 38680738.73;    // D22
-
+    private String fechaInicio = "2025-10-01";
+    private String fechaFin = "2025-10-11";
+    private final Calendar fechaSeleccionada = Calendar.getInstance();
+    private View menuOverlay;
     //inputs y views
     private ImageView mapaView;
     private TextView tvPrecipitation, tvHumidity, tvAccumulatedPrecipitation, tvHumidityIndex;
@@ -100,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         spinnerZone.setAdapter(adapter);
 
         // 6. (Opcional) Detecta cuando el usuario selecciona un elemento
-        spinnerZone.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        /*spinnerZone.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String seleccionado = parent.getItemAtPosition(position).toString();
@@ -115,8 +125,11 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
                 // Acción si no hay nada seleccionado
             }
-        });
+        });*/
+        //configurarSelectorFecha();
         consultarAmbasVariables();
+
+        //configurarMenuOverlay();
     }
     private TextView getTextView(int id){
         return (TextView) findViewById(id);
@@ -244,13 +257,13 @@ public class MainActivity extends AppCompatActivity {
 
             String parametros =
                     "_type=series" +
-                            "&timestamp=2025-10-01" +
+                            "&timestamp="+ fechaInicio +
                             "&steps=31" +
                             "&layer=" + URLEncoder.encode(layer, "UTF-8") +
                             "&colormap=" + URLEncoder.encode(colormap, "UTF-8") +
                             "&bbox="+ cuadrantes[indexRegion] +
                             "&bins=10" +
-                            "&end_timestamp=2025-10-11";
+                            "&end_timestamp="+ fechaFin;
 
             URL url = new URL(URL_BASE + "?" + parametros);
 
@@ -406,5 +419,79 @@ public class MainActivity extends AppCompatActivity {
     }
     private String vistaPresent(float numero) {
         return  String.format("%.2f", numero);
+    }
+    private void configurarSelectorFecha() {
+        TextView tvFecha = findViewById(R.id.tvSelectedDate);
+
+        // Fecha inicial = la que ya usabas (11/10/2025)
+        fechaSeleccionada.set(2025, Calendar.OCTOBER, 11);
+        tvFecha.setText(textoFecha(fechaSeleccionada));
+        tvFecha.setTextColor(Color.parseColor("#1A1A1A"));
+
+        findViewById(R.id.cardDateSelector).setOnClickListener(v -> {
+            DatePickerDialog dialogo = new DatePickerDialog(
+                    this,
+                    (vista, year, month, day) -> {
+                        fechaSeleccionada.set(year, month, day);
+                        tvFecha.setText(textoFecha(fechaSeleccionada));
+
+                        // Ventana de 10 días que termina en la fecha elegida
+                        fechaFin = formatoApi(fechaSeleccionada);
+                        Calendar inicio = (Calendar) fechaSeleccionada.clone();
+                        inicio.add(Calendar.DAY_OF_YEAR, -6);
+                        fechaInicio = formatoApi(inicio);
+                        Log.d(TAG, "fechaInicio=" + fechaInicio + " | fechaFin=" + fechaFin);
+
+                        consultarAmbasVariables();
+                    },
+                    fechaSeleccionada.get(Calendar.YEAR),
+                    fechaSeleccionada.get(Calendar.MONTH),
+                    fechaSeleccionada.get(Calendar.DAY_OF_MONTH)
+            );
+            // No permitir fechas muy recientes: la NASA aún no tiene datos
+            dialogo.getDatePicker().setMaxDate(System.currentTimeMillis() - 2 * MS_DIA);
+            dialogo.show();
+        });
+    }
+
+    private String formatoApi(Calendar c) {
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(c.getTime());
+    }
+
+    private String textoFecha(Calendar c) {
+        return new SimpleDateFormat("dd/MM/yyyy", Locale.US).format(c.getTime());
+    }
+    private void configurarMenuOverlay() {
+        menuOverlay = findViewById(R.id.menuOverlayRoot);
+
+        findViewById(R.id.btnMenu).setOnClickListener(v ->
+                menuOverlay.setVisibility(View.VISIBLE));
+
+        findViewById(R.id.btnCloseMenu).setOnClickListener(v ->
+                menuOverlay.setVisibility(View.GONE));
+        menuOverlay.setOnClickListener(v ->
+                menuOverlay.setVisibility(View.GONE));
+
+        findViewById(R.id.optionAutoAssignZone).setOnClickListener(v -> {
+            menuOverlay.setVisibility(View.GONE);
+            // TODO: lógica de "Asignar zona automáticamente"
+        });
+
+        findViewById(R.id.optionAbout).setOnClickListener(v -> {
+            menuOverlay.setVisibility(View.GONE);
+            // TODO: mostrar "Acerca de"
+        });
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (menuOverlay.getVisibility() == View.VISIBLE) {
+                    menuOverlay.setVisibility(View.GONE);
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
     }
 }
