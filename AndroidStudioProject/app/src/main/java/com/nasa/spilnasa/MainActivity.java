@@ -14,6 +14,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -48,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private static final double VOLUMEN_SEGURO = 38680738.73;    // D22
 
     //inputs y views
-    private ImageView mapaView, imageViewmapa;
+    private ImageView mapaView;
     private TextView tvPrecipitation, tvHumidity, tvAccumulatedPrecipitation, tvHumidityIndex;
     private MaterialCardView colorAlert;
     private TextView tvAlertLevel, tvAlertSubtitle, tvAlertDescription;
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private String alerta = "", alertaAcum = "";
     private float precipitacionOne = 0.0f;
     private int fase = 0;
-    private EditText tvSelectedDate;
+    private TextView tvSelectedDate;
     private Spinner spinnerZone;
     private String[] regiones = {"Zona Norte de Veracruz (Alamo)","Zona Norte de Veracruz (Poza Rica)", "Zona Norte de Veracruz (Tantoyuca)"};
     private String[] cuadrantes = {"20.7283,-97.3204,21.1368,-96.9119", "-102.7302,18.178909,-91.97641,23.0447246","-109.6064,12.9984015625,-82.6064,25.2151984375"};
@@ -76,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
         });
         // definición de views
         mapaView = (ImageView) findViewById(R.id.mapaIMG);
-        imageViewmapa = (ImageView) findViewById(R.id.imageViewmapa);
         tvPrecipitation = getTextView(R.id.tvPrecipitation);
         tvHumidity = getTextView(R.id.tvHumidity);
         tvAccumulatedPrecipitation = getTextView(R.id.tvAccumulatedPrecipitation);
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 String seleccionado = parent.getItemAtPosition(position).toString();
                 Toast.makeText(MainActivity.this, "Calculando nueva zona", Toast.LENGTH_LONG).show();
                 indexRegion = position;
-                imageViewmapa.setImageResource(locateMap[indexRegion]);
+
                 mapaView.setImageResource(locateMapAltura[indexRegion]);
                 colometriaIMG = new ColometriaIMG(mapaView);
                 consultarAmbasVariables();
